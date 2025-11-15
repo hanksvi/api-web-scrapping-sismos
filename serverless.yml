@@ -1,0 +1,38 @@
+org: hanksvi
+service: api-web-scraping-sismos
+
+provider:
+  name: aws
+  runtime: python3.12
+  # Default memory size for functions (default: 1024MB)
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: arn:aws:iam::090821350323:role/LabRole
+
+functions:
+  scrape_table:
+    handler: scrape_table.lambda_handler
+    package:
+      include:
+        - ./**
+    events:
+      - http:
+          path: /scrape/table
+          method: get
+          cors: true
+          integration: lambda
+
+resources:
+  Resources:
+    TablaSismos:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TablaSismos
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
